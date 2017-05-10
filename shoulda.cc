@@ -39,10 +39,16 @@ void outputCursor(CXCursor c) {
        << clang_getTypeSpelling(clang_getCursorType(c)) << "'\n";
 }
 
-int main() {
+int main(int argc, char* argv[]) {
+  if (argc < 2) {
+    cerr << "usage: shoulda <path>" << endl;
+    exit(-1);
+  }
+  const char* path = argv[1];
+
   CXIndex index = clang_createIndex(0, 0);
   CXTranslationUnit unit = clang_parseTranslationUnit(
-      index, "calltest.cc", nullptr, 0, nullptr, 0, CXTranslationUnit_None);
+      index, path, nullptr, 0, nullptr, 0, CXTranslationUnit_None);
   if (unit == nullptr) {
     cerr << "Unable to parse translation unit. Quitting." << endl;
     exit(-1);
