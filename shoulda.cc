@@ -3,16 +3,35 @@
 #include <clang-c/Index.h> // This is libclang.
 #include <iostream>
 
-// TODO
-#include <clang/ASTMatchers/ASTMatchers.h>
-
-using namespace std;
+using std::cerr;
+using std::cout;
+using std::endl;
+using std::ostream;
 
 ostream &operator<<(ostream &stream, const CXString &str) {
   stream << clang_getCString(str);
   clang_disposeString(str);
   return stream;
 }
+
+void outputError(CXCursor cursor) {
+  const auto location = clang_getCursorLocation(cursor);
+
+  CXFile file;
+  unsigned line;
+  unsigned column;
+  unsigned offset;
+
+  clang_getSpellingLocation(location,
+                            &file,
+                            &line,
+                            &column,
+                            &offset);
+  cout << clang_getFileName(file) << ":"
+       << line << ":"
+       << column << ": warning: unused return value\n";
+}
+
 
 void outputCursor(CXCursor c) {
   cout << "Cursor '" << clang_getCursorSpelling(c) << "' of kind '"
@@ -32,7 +51,7 @@ int main() {
   CXCursor cursor = clang_getTranslationUnitCursor(unit);
   clang_visitChildren(
       cursor,
-      [](CXCursor current, CXCursor parent, CXClientData client_data) {
+      [](CXCursor current, CXCursor parent, CXClientData) {
         // Function call
         if (clang_getCursorKind(current) == CXCursor_CallExpr) {
 
@@ -43,10 +62,8 @@ int main() {
             if (parent_kind != CXCursor_CallExpr &&
                 parent_kind != CXCursor_ReturnStmt &&
                 parent_kind != CXCursor_VarDecl) {
-              cout << "error detected!";
+              outputError(current);
             }
-            // outputCursor(current);
-            // outputCursor(parent);
           }
         }
         return CXChildVisit_Recurse;

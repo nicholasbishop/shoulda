@@ -5,4 +5,4 @@ add_executable(shoulda shoulda.cc)
 set(CMAKE_CXX_FLAGS "-Wall -Wextra")
 
 # TODO
-target_link_libraries(shoulda clang clangASTMatchers clangAST clangBasic LLVM)
+target_link_libraries(shoulda clang)

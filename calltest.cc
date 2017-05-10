@@ -11,6 +11,7 @@ void itake(int val) {
 int main() {
   noret();
   iret();
+  iret();
 
   int a = iret();
   itake(iret());
