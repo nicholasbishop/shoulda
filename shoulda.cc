@@ -143,8 +143,11 @@ int main(int argc, char* argv[]) {
             if (clang_getCursorType(current).kind != CXType_Void) {
 
               const auto parent_kind = clang_getCursorKind(parent);
-              if (parent_kind != CXCursor_CallExpr &&
+              if (parent_kind != CXCursor_BinaryOperator &&
+                  parent_kind != CXCursor_CallExpr &&
+                  parent_kind != CXCursor_MemberRefExpr &&
                   parent_kind != CXCursor_ReturnStmt &&
+                  parent_kind != CXCursor_TypedefDecl &&
                   parent_kind != CXCursor_VarDecl) {
                 outputError(current, parent_kind);
               }
