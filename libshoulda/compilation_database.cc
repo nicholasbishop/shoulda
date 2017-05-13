@@ -8,12 +8,14 @@
 namespace shoulda {
 
 namespace {
+
 std::string to_string(const CXString input) {
   const std::string output = clang_getCString(input);
   clang_disposeString(input);
   return output;
 }
-}
+
+}  // namespace
 
 CompileCommand::CompileCommand(const CXCompileCommand command)
     : command_(command) {
@@ -23,9 +25,18 @@ std::string CompileCommand::working_directory() const {
   return to_string(clang_CompileCommand_getDirectory(command_));
 }
 
-// TODO
-CXCompileCommand CompileCommand::raw() const {
-  return command_;
+CommandLine CompileCommand::command_line() const {
+  const auto num_args = clang_CompileCommand_getNumArgs(command_);
+
+  CommandLine command_line;
+  command_line.reserve(num_args);
+
+  for (unsigned i = 0; i < num_args; ++i) {
+    const auto arg = clang_CompileCommand_getArg(command_, i);
+    command_line.emplace_back(to_string(arg));
+  }
+
+  return command_line;
 }
 
 CompileCommands::Iter::Iter(const CompileCommands& parent, const size_t index)

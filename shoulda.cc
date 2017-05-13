@@ -9,6 +9,7 @@
 #include <clang-c/Index.h>
 
 #include "libshoulda/compilation_database.hh"
+#include "libshoulda/translation_unit.hh"
 
 using std::cerr;
 using std::cout;
@@ -16,6 +17,7 @@ using std::endl;
 using std::ostream;
 
 using shoulda::CompilationDatabase;
+using shoulda::TranslationUnit;
 
 ostream &operator<<(ostream &stream, const CXString &str) {
   stream << clang_getCString(str);
@@ -69,54 +71,10 @@ int main(int argc, char* argv[]) {
       exit(-1);
     }
 
-    const auto num_command_line_args = clang_CompileCommand_getNumArgs(cc.raw());
-    std::vector<CXString> free_later;
+    const auto tu = TranslationUnit::from_command_line(
+        index, cc.command_line());
 
-    std::vector<const char*> command_line_args;
-    for (unsigned j = 0; j < num_command_line_args; ++j) {
-      const auto arg = clang_CompileCommand_getArg(cc.raw(), j);
-      command_line_args.emplace_back(clang_getCString(arg));
-      free_later.emplace_back(arg);
-    }
-
-    for (const char *clarg : command_line_args) {
-      cout << "  arg: " << clarg << endl;
-    }
-
-    CXTranslationUnit tu;
-    const auto tu_err = clang_parseTranslationUnit2FullArgv(
-        index, nullptr,
-        command_line_args.data(), num_command_line_args,
-        nullptr, 0,
-        CXTranslationUnit_None,
-        &tu);
-
-    for (const auto str : free_later) {
-      clang_disposeString(str);
-    }
-
-    switch (tu_err) {
-      case CXError_Success:
-        break;
-
-      case CXError_Failure:
-        cerr << "CXError_Failure" << endl;
-        exit(-1);
-
-      case CXError_Crashed:
-        cerr << "CXError_Crashed" << endl;
-        exit(-1);
-
-      case CXError_InvalidArguments:
-        cerr << "CXError_InvalidArguments" << endl;
-        exit(-1);
-
-      case CXError_ASTReadError:
-        cerr << "CXError_ASTReadError" << endl;
-        exit(-1);
-    }
-  
-    CXCursor cursor = clang_getTranslationUnitCursor(tu);
+    CXCursor cursor = clang_getTranslationUnitCursor(tu.raw());
     clang_visitChildren(
         cursor,
         [](CXCursor current, CXCursor parent, CXClientData) {

@@ -5,6 +5,8 @@
 
 #include <clang-c/CXCompilationDatabase.h>
 
+#include "libshoulda/command_line.hh"
+
 namespace shoulda {
 
 class CompileCommand {
@@ -13,8 +15,7 @@ class CompileCommand {
 
   std::string working_directory() const;
 
-  // TODO
-  CXCompileCommand raw() const;
+  CommandLine command_line() const;
 
  private:
   const CXCompileCommand command_;

@@ -3,6 +3,7 @@
 
 #include "libshoulda/compilation_database.hh"
 
-TEST_CASE("blah") {
+TEST_CASE("simple_unused_return") {
+  
   REQUIRE(1 < 2);
 }

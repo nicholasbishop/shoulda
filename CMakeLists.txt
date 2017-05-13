@@ -9,7 +9,8 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 add_library(
   libshoulda
   libshoulda/compilation_database.cc
-  libshoulda/error.cc)
+  libshoulda/error.cc
+  libshoulda/translation_unit.cc)
 
 add_executable(
   shoulda
