@@ -61,12 +61,9 @@ int main(int argc, char* argv[]) {
 
   CXIndex index = clang_createIndex(1, 1);
 
-  const auto all_cc = clang_CompilationDatabase_getAllCompileCommands(database.raw());
-  const auto num_cc = clang_CompileCommands_getSize(all_cc);
+  const auto all_cc = database.all_compile_commands();
 
-  for (unsigned i = 0; i < num_cc; ++i) {
-    const auto cc = clang_CompileCommands_getCommand(all_cc, i);
-
+  for (const auto cc : all_cc) {
     const auto source_filename = clang_CompileCommand_getFilename(cc);
     const auto wd = clang_CompileCommand_getDirectory(cc);
 
@@ -152,6 +149,5 @@ int main(int argc, char* argv[]) {
         nullptr);
   }
 
-  clang_CompileCommands_dispose(all_cc);
   clang_disposeIndex(index);
 }
