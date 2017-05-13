@@ -18,8 +18,8 @@ http://stackoverflow.com/questions/43811955/how-can-i-lint-c-code-to-find-all-un
 2. Build with CMake
 
         mkdir build
-		cd build
-		cmake -G Ninja ..
-		ninja
+        cd build
+        cmake -G Ninja ..
+        ninja
 
    (You can use Make or some other build system instead of Ninja.)
