@@ -3,15 +3,19 @@
 #include <iostream>
 #include <vector>
 
+#include <unistd.h>
+
 #include <clang-c/CXCompilationDatabase.h>
 #include <clang-c/Index.h>
 
-#include <unistd.h>
+#include "libshoulda/compilation_database.hh"
 
 using std::cerr;
 using std::cout;
 using std::endl;
 using std::ostream;
+
+using shoulda::CompilationDatabase;
 
 ostream &operator<<(ostream &stream, const CXString &str) {
   stream << clang_getCString(str);
@@ -53,21 +57,11 @@ int main(int argc, char* argv[]) {
   }
   const char* path = argv[1];
 
-  CXCompilationDatabase_Error cdb_err;
-  const auto cdb = clang_CompilationDatabase_fromDirectory(path, &cdb_err);
-
-  switch (cdb_err) {
-    case CXCompilationDatabase_NoError:
-      break;
-
-    case CXCompilationDatabase_CanNotLoadDatabase:
-      cerr << "unable to load compilation database" << endl;
-      exit(-1);
-  }
+  const auto database = CompilationDatabase::from_directory(path);
 
   CXIndex index = clang_createIndex(1, 1);
 
-  const auto all_cc = clang_CompilationDatabase_getAllCompileCommands(cdb);
+  const auto all_cc = clang_CompilationDatabase_getAllCompileCommands(database.raw());
   const auto num_cc = clang_CompileCommands_getSize(all_cc);
 
   for (unsigned i = 0; i < num_cc; ++i) {
@@ -159,6 +153,5 @@ int main(int argc, char* argv[]) {
   }
 
   clang_CompileCommands_dispose(all_cc);
-  clang_CompilationDatabase_dispose(cdb);
   clang_disposeIndex(index);
 }
