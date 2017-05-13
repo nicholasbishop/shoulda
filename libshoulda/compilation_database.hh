@@ -7,6 +7,19 @@
 
 namespace shoulda {
 
+class CompileCommand {
+ public:
+  CompileCommand(const CXCompileCommand command);
+
+  std::string working_directory() const;
+
+  // TODO
+  CXCompileCommand raw() const;
+
+ private:
+  const CXCompileCommand command_;
+};
+
 class CompileCommands {
  public:
   class Iter {
@@ -17,8 +30,7 @@ class CompileCommands {
 
     Iter& operator++();
 
-    // TODO, wrap type
-    CXCompileCommand operator*() const;
+    CompileCommand operator*() const;
 
    private:
     const CompileCommands& parent_;
@@ -29,8 +41,7 @@ class CompileCommands {
 
   ~CompileCommands();
 
-  // TODO, wrap type
-  CXCompileCommand operator[](const size_t index) const;
+  CompileCommand operator[](const size_t index) const;
 
   Iter begin() const;
 

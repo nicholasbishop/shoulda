@@ -64,24 +64,17 @@ int main(int argc, char* argv[]) {
   const auto all_cc = database.all_compile_commands();
 
   for (const auto cc : all_cc) {
-    const auto source_filename = clang_CompileCommand_getFilename(cc);
-    const auto wd = clang_CompileCommand_getDirectory(cc);
-
-    if (chdir(clang_getCString(wd)) != 0) {
+    if (chdir(cc.working_directory().c_str()) != 0) {
       cerr << "chdir failed" << endl;
       exit(-1);
     }
 
-    cout << "source: " << clang_getCString(source_filename) << endl;
-
-    const auto num_command_line_args = clang_CompileCommand_getNumArgs(cc);
+    const auto num_command_line_args = clang_CompileCommand_getNumArgs(cc.raw());
     std::vector<CXString> free_later;
-    free_later.emplace_back(source_filename);
-    free_later.emplace_back(wd);
 
     std::vector<const char*> command_line_args;
     for (unsigned j = 0; j < num_command_line_args; ++j) {
-      const auto arg = clang_CompileCommand_getArg(cc, j);
+      const auto arg = clang_CompileCommand_getArg(cc.raw(), j);
       command_line_args.emplace_back(clang_getCString(arg));
       free_later.emplace_back(arg);
     }

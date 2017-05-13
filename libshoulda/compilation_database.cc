@@ -7,6 +7,27 @@
 
 namespace shoulda {
 
+namespace {
+std::string to_string(const CXString input) {
+  const std::string output = clang_getCString(input);
+  clang_disposeString(input);
+  return output;
+}
+}
+
+CompileCommand::CompileCommand(const CXCompileCommand command)
+    : command_(command) {
+}
+
+std::string CompileCommand::working_directory() const {
+  return to_string(clang_CompileCommand_getDirectory(command_));
+}
+
+// TODO
+CXCompileCommand CompileCommand::raw() const {
+  return command_;
+}
+
 CompileCommands::Iter::Iter(const CompileCommands& parent, const size_t index)
     : parent_(parent), index_(index) {
 }
@@ -20,7 +41,7 @@ CompileCommands::Iter& CompileCommands::Iter::operator++() {
   return *this;
 }
 
-CXCompileCommand CompileCommands::Iter::operator*() const {
+CompileCommand CompileCommands::Iter::operator*() const {
   return parent_[index_];
 }
 
@@ -33,11 +54,11 @@ CompileCommands::~CompileCommands() {
   clang_CompileCommands_dispose(commands_);
 }
 
-CXCompileCommand CompileCommands::operator[](const size_t index) const {
+CompileCommand CompileCommands::operator[](const size_t index) const {
   if (index < size_) {
-    return clang_CompileCommands_getCommand(commands_, index);
+    return CompileCommand(clang_CompileCommands_getCommand(commands_, index));
   } else {
-    return nullptr;
+    throw Error("index out of range");
   }
 }
 
