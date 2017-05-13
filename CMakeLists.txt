@@ -6,11 +6,19 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-add_executable(
-  shoulda
-  shoulda.cc
+add_library(
+  libshoulda
   libshoulda/compilation_database.cc
   libshoulda/error.cc)
 
-# TODO
-target_link_libraries(shoulda clang)
+add_executable(
+  shoulda
+  shoulda.cc)
+
+add_executable(
+  tests
+  tests/tests.cc)
+
+target_link_libraries(shoulda clang libshoulda)
+
+target_link_libraries(tests clang libshoulda)
