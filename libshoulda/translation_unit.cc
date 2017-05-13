@@ -60,8 +60,8 @@ TranslationUnit::~TranslationUnit() {
   clang_disposeTranslationUnit(translation_unit_);
 }
 
-CXTranslationUnit TranslationUnit::raw() const {
-  return translation_unit_;
+Cursor TranslationUnit::cursor() const {
+  return Cursor(clang_getTranslationUnitCursor(translation_unit_));
 }
 
 TranslationUnit::TranslationUnit(const CXTranslationUnit translation_unit)

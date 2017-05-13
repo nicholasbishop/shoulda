@@ -4,19 +4,18 @@
 #include <clang-c/Index.h>
 
 #include "libshoulda/command_line.hh"
+#include "libshoulda/cursor.hh"
 
 namespace shoulda {
 
 class TranslationUnit {
  public:
-  // TODO wrap CXIndex?
   static TranslationUnit from_command_line(
       const CXIndex index, const CommandLine& command_line);
 
   ~TranslationUnit();
 
-  // TODO
-  CXTranslationUnit raw() const;
+  Cursor cursor() const;
 
  private:
   TranslationUnit(const CXTranslationUnit translation_unit);

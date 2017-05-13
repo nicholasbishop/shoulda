@@ -8,6 +8,7 @@
 #include <clang-c/CXCompilationDatabase.h>
 #include <clang-c/Index.h>
 
+#include "libshoulda/code_index.hh"
 #include "libshoulda/compilation_database.hh"
 #include "libshoulda/translation_unit.hh"
 
@@ -16,7 +17,9 @@ using std::cout;
 using std::endl;
 using std::ostream;
 
+using shoulda::CodeIndex;
 using shoulda::CompilationDatabase;
+using shoulda::Cursor;
 using shoulda::TranslationUnit;
 
 ostream &operator<<(ostream &stream, const CXString &str) {
@@ -25,8 +28,8 @@ ostream &operator<<(ostream &stream, const CXString &str) {
   return stream;
 }
 
-void outputError(CXCursor cursor, CXCursorKind parent_kind) {
-  const auto location = clang_getCursorLocation(cursor);
+void outputError(Cursor cursor, Cursor parent) {
+  const auto location = cursor.location();
 
   CXFile file;
   unsigned line;
@@ -41,7 +44,7 @@ void outputError(CXCursor cursor, CXCursorKind parent_kind) {
   cout << clang_getFileName(file) << ":"
        << line << ":"
        << column << ": warning: unused return value (parent is "
-       << clang_getCursorKindSpelling(parent_kind) << ")"
+       << clang_getCursorKindSpelling(parent.kind()) << ")"
        << endl;
 }
 
@@ -61,7 +64,7 @@ int main(int argc, char* argv[]) {
 
   const auto database = CompilationDatabase::from_directory(path);
 
-  CXIndex index = clang_createIndex(1, 1);
+  CodeIndex index;
 
   const auto all_cc = database.all_compile_commands();
 
@@ -71,34 +74,29 @@ int main(int argc, char* argv[]) {
       exit(-1);
     }
 
-    const auto tu = TranslationUnit::from_command_line(
-        index, cc.command_line());
+    const auto tu = index.create_translation_unit(cc);
 
-    CXCursor cursor = clang_getTranslationUnitCursor(tu.raw());
-    clang_visitChildren(
-        cursor,
-        [](CXCursor current, CXCursor parent, CXClientData) {
+    const auto cursor = tu.cursor();
+    cursor.visit_children(
+        [](Cursor current, Cursor parent) {
           // Function call
-          if (clang_getCursorKind(current) == CXCursor_CallExpr) {
+          if (current.kind() == CXCursor_CallExpr) {
 
             // Function's return value is not void
-            if (clang_getCursorType(current).kind != CXType_Void) {
+            if (current.type().kind != CXType_Void) {
 
-              const auto parent_kind = clang_getCursorKind(parent);
+              const auto parent_kind = parent.kind();
               if (parent_kind != CXCursor_BinaryOperator &&
                   parent_kind != CXCursor_CallExpr &&
                   parent_kind != CXCursor_MemberRefExpr &&
                   parent_kind != CXCursor_ReturnStmt &&
                   parent_kind != CXCursor_TypedefDecl &&
                   parent_kind != CXCursor_VarDecl) {
-                outputError(current, parent_kind);
+                outputError(current, parent);
               }
             }
           }
           return CXChildVisit_Recurse;
-        },
-        nullptr);
+        });
   }
-
-  clang_disposeIndex(index);
 }

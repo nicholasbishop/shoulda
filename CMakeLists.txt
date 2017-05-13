@@ -8,7 +8,9 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 add_library(
   libshoulda
+  libshoulda/code_index.cc
   libshoulda/compilation_database.cc
+  libshoulda/cursor.cc
   libshoulda/error.cc
   libshoulda/translation_unit.cc)
 
