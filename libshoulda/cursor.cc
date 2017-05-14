@@ -1,4 +1,8 @@
+// TODO remove this
+#include <iostream>
+
 #include "libshoulda/cursor.hh"
+#include "libshoulda/util.hh"
 
 namespace shoulda {
 
@@ -31,6 +35,11 @@ std::vector<Location> Cursor::find_unused_return_values() const {
 
 bool Cursor::is_unused_return_value(
     const Cursor& current, const Cursor& parent) {
+  // TODO
+  std::cerr << "kind=" << clang_getCursorKindSpelling(current.kind())
+            << clang_getTypeSpelling(current.type())
+            << std::endl;
+
   if (current.kind() != CXCursor_CallExpr) {
     // Not a function call
     return false;
