@@ -10,7 +10,6 @@
 
 using shoulda::CodeIndex;
 using shoulda::Location;
-using shoulda::UnusedReturnValue;
 using shoulda::W;
 
 // Assumes that the test program is run from a build directory inside
@@ -19,11 +18,11 @@ using shoulda::W;
 
 namespace {
 
-std::vector<W> to_w(const std::vector<UnusedReturnValue> &input) {
+std::vector<W> to_w(const std::vector<Location> &input) {
   std::vector<W> output;
   output.reserve(input.size());
   for (const auto& elem : input) {
-    output.emplace_back(W(elem.location.line(), elem.location.column()));
+    output.emplace_back(W(elem.line(), elem.column()));
   }
   return output;
 }
@@ -36,7 +35,7 @@ std::vector<W> load(const std::string path) {
   CodeIndex index;
   const auto unit = index.translation_unit_from_source_file(
       base_path + path);
-  return to_w(unit.find_unused_return_values());
+  return to_w(unit.cursor().find_unused_return_values());
 }
 
 }
