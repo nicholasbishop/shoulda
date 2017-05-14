@@ -27,6 +27,17 @@ inline std::ostream& operator<<(std::ostream& os, const W& w) {
   return os;
 }
 
+inline bool operator==(
+    const std::initializer_list<W> &inl, const std::vector<W>& vec) {
+  return std::equal(std::begin(inl), std::end(inl),
+                    std::begin(vec), std::end(vec));
+}
+
+inline bool operator==(
+    const std::vector<W>& vec, const std::initializer_list<W> &inl) {
+  return inl == vec;
+}
+
 }
 
 #endif

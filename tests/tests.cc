@@ -1,3 +1,6 @@
+#include <algorithm>
+#include <iterator>
+
 #include "libshoulda/code_index.hh"
 
 #include "tests/w.hh"
@@ -39,11 +42,24 @@ std::vector<W> load(const std::string path) {
 }
 
 TEST_CASE("simple_unused_return") {
-  const auto w = load("simple_unused_return.c");
-  REQUIRE(w[0] == W(6, 3));
+  const auto e = {W(6, 3)};
+  REQUIRE(load("simple_unused_return.c") == e);
 }
 
 TEST_CASE("simple_used_return") {
-  const auto w = load("simple_used_return.c");
-  REQUIRE(w.empty());
+  REQUIRE(load("simple_used_return.c").empty());
+}
+
+TEST_CASE("if_condition") {
+  REQUIRE(load("if_condition.c").empty());
+}
+
+TEST_CASE("if_braced_body") {
+  const auto e = {W(7, 5)};
+  REQUIRE(load("if_braced_body.c") == e);
+}
+
+TEST_CASE("if_unbraced_body") {
+  const auto e = {W(7, 5)};
+  REQUIRE(load("if_unbraced_body.c") == e);
 }

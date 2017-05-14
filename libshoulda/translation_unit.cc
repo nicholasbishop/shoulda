@@ -29,6 +29,7 @@ TranslationUnit::find_unused_return_values() const {
             const auto parent_kind = parent.kind();
             if (parent_kind != CXCursor_BinaryOperator &&
                 parent_kind != CXCursor_CallExpr &&
+                parent_kind != CXCursor_IfStmt &&
                 parent_kind != CXCursor_MemberRefExpr &&
                 parent_kind != CXCursor_ReturnStmt &&
                 parent_kind != CXCursor_TypedefDecl &&
