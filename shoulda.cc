@@ -24,11 +24,6 @@ using shoulda::TranslationUnit;
 using shoulda::is_directory;
 using shoulda::to_string;
 
-ostream &operator<<(ostream &stream, const CXString &str) {
-  stream << to_string(str);
-  return stream;
-}
-
 void outputError(Cursor cursor, Cursor parent) {
   const auto location = cursor.location();
 

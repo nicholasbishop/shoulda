@@ -16,3 +16,8 @@ std::string to_string(const CXString input) {
 }
 
 }
+
+std::ostream &operator<<(std::ostream &stream, const CXString &str) {
+  stream << shoulda::to_string(str);
+  return stream;
+}
