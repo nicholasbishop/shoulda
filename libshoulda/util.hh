@@ -7,6 +7,8 @@
 
 namespace shoulda {
 
+bool is_directory(const std::string& path);
+
 std::string to_string(const CXString input);
 
 }
