@@ -10,15 +10,14 @@ namespace shoulda {
 
 class TranslationUnit {
  public:
-  static TranslationUnit from_command_line(
-      const CXIndex index, const CommandLine& command_line);
+  TranslationUnit(const CXTranslationUnit translation_unit);
 
   ~TranslationUnit();
 
   Cursor cursor() const;
 
  private:
-  TranslationUnit(const CXTranslationUnit translation_unit);
+  
 
   const CXTranslationUnit translation_unit_;
 };

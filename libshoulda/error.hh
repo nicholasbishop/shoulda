@@ -10,6 +10,11 @@ class Error : public std::runtime_error {
   Error(const char* what);
 };
 
+class Unreachable : public Error {
+ public:
+  Unreachable();
+};
+
 }
 
 #endif

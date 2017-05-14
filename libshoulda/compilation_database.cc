@@ -94,7 +94,7 @@ CompilationDatabase CompilationDatabase::from_directory(
       throw Error("couldn't load compilation database");
   }
 
-  throw Error("unknown error creating compilation database");
+  throw Unreachable();
 }
 
 CompileCommands CompilationDatabase::all_compile_commands() const {

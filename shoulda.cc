@@ -74,7 +74,7 @@ int main(int argc, char* argv[]) {
       exit(-1);
     }
 
-    const auto tu = index.create_translation_unit(cc);
+    const auto tu = index.translation_unit_from_command(cc);
 
     const auto cursor = tu.cursor();
     cursor.visit_children(
