@@ -3,6 +3,8 @@
 
 #include <clang-c/Index.h>
 
+#include "libshoulda/location.hh"
+
 namespace shoulda {
 
 class Cursor {
@@ -24,10 +26,10 @@ class Cursor {
 
   CXCursorKind kind() const;
 
+  Location location() const;
+
   CXType type() const;
 
-  // TODO, wrap?
-  CXSourceLocation location() const;
 
  private:
   const CXCursor cursor_;

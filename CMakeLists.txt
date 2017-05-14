@@ -12,7 +12,9 @@ add_library(
   libshoulda/compilation_database.cc
   libshoulda/cursor.cc
   libshoulda/error.cc
-  libshoulda/translation_unit.cc)
+  libshoulda/location.cc
+  libshoulda/translation_unit.cc
+  libshoulda/util.cc)
 
 add_executable(
   shoulda

@@ -4,18 +4,9 @@
 
 #include "libshoulda/compilation_database.hh"
 #include "libshoulda/error.hh"
+#include "libshoulda/util.hh"
 
 namespace shoulda {
-
-namespace {
-
-std::string to_string(const CXString input) {
-  const std::string output = clang_getCString(input);
-  clang_disposeString(input);
-  return output;
-}
-
-}  // namespace
 
 CompileCommand::CompileCommand(const CXCompileCommand command)
     : command_(command) {

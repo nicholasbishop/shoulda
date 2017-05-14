@@ -20,7 +20,6 @@ using std::ostream;
 using shoulda::CodeIndex;
 using shoulda::CompilationDatabase;
 using shoulda::Cursor;
-using shoulda::TranslationUnit;
 
 ostream &operator<<(ostream &stream, const CXString &str) {
   stream << clang_getCString(str);
@@ -31,19 +30,9 @@ ostream &operator<<(ostream &stream, const CXString &str) {
 void outputError(Cursor cursor, Cursor parent) {
   const auto location = cursor.location();
 
-  CXFile file;
-  unsigned line;
-  unsigned column;
-  unsigned offset;
-
-  clang_getSpellingLocation(location,
-                            &file,
-                            &line,
-                            &column,
-                            &offset);
-  cout << clang_getFileName(file) << ":"
-       << line << ":"
-       << column << ": warning: unused return value (parent is "
+  cout << location.path() << ":"
+       << location.line() << ":"
+       << location.column() << ": warning: unused return value (parent is "
        << clang_getCursorKindSpelling(parent.kind()) << ")"
        << endl;
 }

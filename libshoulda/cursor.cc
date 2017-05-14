@@ -14,8 +14,8 @@ CXType Cursor::type() const {
   return clang_getCursorType(cursor_);
 }
 
-CXSourceLocation Cursor::location() const {
-  return clang_getCursorLocation(cursor_);
+Location Cursor::location() const {
+  return Location::create(clang_getCursorLocation(cursor_));
 }
 
 }
