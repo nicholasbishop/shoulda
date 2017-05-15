@@ -10,6 +10,10 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 add_library(
+  plushoulda
+  plugin.cc)
+
+add_library(
   libshoulda
   libshoulda/code_index.cc
   libshoulda/compilation_database.cc
