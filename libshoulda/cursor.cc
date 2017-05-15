@@ -37,7 +37,7 @@ bool Cursor::is_unused_return_value(
     const Cursor& current, const Cursor& parent) {
   // TODO
   std::cerr << "kind=" << clang_getCursorKindSpelling(current.kind())
-            << clang_getTypeSpelling(current.type())
+            << ", type=" << clang_getTypeSpelling(current.type())
             << std::endl;
 
   if (current.kind() != CXCursor_CallExpr) {
