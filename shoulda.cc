@@ -1,86 +1,55 @@
-// adapted from http://shaharmike.com/cpp/libclang/
+#include "clang/AST/ASTConsumer.h"
+#include "clang/AST/RecursiveASTVisitor.h"
+#include "clang/Frontend/CompilerInstance.h"
+#include "clang/Frontend/FrontendAction.h"
+#include "clang/Tooling/Tooling.h"
 
-#include <iostream>
-#include <vector>
+using namespace clang;
 
-#include <unistd.h>
+class FindNamedClassVisitor
+  : public RecursiveASTVisitor<FindNamedClassVisitor> {
+public:
+  explicit FindNamedClassVisitor(ASTContext *Context)
+    : Context(Context) {}
 
-#include <clang-c/Index.h>
-
-#include "libshoulda/code_index.hh"
-#include "libshoulda/compilation_database.hh"
-#include "libshoulda/translation_unit.hh"
-#include "libshoulda/util.hh"
-
-using std::cerr;
-using std::cout;
-using std::endl;
-using std::ostream;
-
-using shoulda::CodeIndex;
-using shoulda::CompilationDatabase;
-using shoulda::Cursor;
-using shoulda::TranslationUnit;
-using shoulda::is_directory;
-using shoulda::to_string;
-
-void outputError(Cursor cursor, Cursor parent) {
-  const auto location = cursor.location();
-
-  cout << location.path() << ":"
-       << location.line() << ":"
-       << location.column() << ": warning: unused return value (parent is "
-       << clang_getCursorKindSpelling(parent.kind()) << ")"
-       << endl;
-}
-
-
-void outputCursor(CXCursor c) {
-  cout << "Cursor '" << clang_getCursorSpelling(c) << "' of kind '"
-       << clang_getCursorKindSpelling(clang_getCursorKind(c)) << "' of type "
-       << clang_getTypeSpelling(clang_getCursorType(c)) << "'\n";
-}
-
-void show_errors(const TranslationUnit& translation_unit) {
-  const auto cursor = translation_unit.cursor();
-  cursor.visit_unused_return_values(
-      [](const Cursor& current, const Cursor& parent) {
-        outputError(current, parent);
-      });
-}
-
-void check_compilation_database(const std::string& path) {
-  const auto database = CompilationDatabase::from_directory(path);
-
-  CodeIndex index;
-
-  const auto all_cc = database.all_compile_commands();
-
-  for (const auto cc : all_cc) {
-    if (chdir(cc.working_directory().c_str()) != 0) {
-      cerr << "chdir failed" << endl;
-      exit(-1);
+  bool VisitCXXRecordDecl(CXXRecordDecl *Declaration) {
+    if (Declaration->getQualifiedNameAsString() == "n::m::C") {
+      FullSourceLoc FullLocation = Context->getFullLoc(Declaration->getLocStart());
+      if (FullLocation.isValid())
+        llvm::outs() << "Found declaration at "
+                     << FullLocation.getSpellingLineNumber() << ":"
+                     << FullLocation.getSpellingColumnNumber() << "\n";
     }
-
-    show_errors(index.translation_unit_from_command(cc));
+    return true;
   }
-}
 
-void check_single_file(const std::string& path) {
-  CodeIndex index;
-  show_errors(index.translation_unit_from_source_file(path));
-}
+private:
+  ASTContext *Context;
+};
 
-int main(int argc, char* argv[]) {
-  if (argc < 2) {
-    cerr << "usage: shoulda <compile-database-directory|source-file>" << endl;
-    exit(-1);
+class FindNamedClassConsumer : public clang::ASTConsumer {
+public:
+  explicit FindNamedClassConsumer(ASTContext *Context)
+    : Visitor(Context) {}
+
+  virtual void HandleTranslationUnit(clang::ASTContext &Context) {
+    Visitor.TraverseDecl(Context.getTranslationUnitDecl());
   }
-  const std::string path = argv[1];
+private:
+  FindNamedClassVisitor Visitor;
+};
 
-  if (is_directory(path)) {
-    check_compilation_database(path);
-  } else {
-    check_single_file(path);
+class FindNamedClassAction : public clang::ASTFrontendAction {
+public:
+  virtual std::unique_ptr<clang::ASTConsumer> CreateASTConsumer(
+    clang::CompilerInstance &Compiler, llvm::StringRef InFile) {
+    return std::unique_ptr<clang::ASTConsumer>(
+        new FindNamedClassConsumer(&Compiler.getASTContext()));
+  }
+};
+
+int main(int argc, char **argv) {
+  if (argc > 1) {
+    clang::tooling::runToolOnCode(new FindNamedClassAction, argv[1]);
   }
 }
