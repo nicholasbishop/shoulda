@@ -1,9 +1,16 @@
+// TODO, from https://clang.llvm.org/docs/LibTooling.html
+#include "clang/Frontend/FrontendActions.h"
+#include "clang/Tooling/CommonOptionsParser.h"
+#include "llvm/Support/CommandLine.h"
+
 #include "clang/AST/ASTConsumer.h"
 #include "clang/AST/RecursiveASTVisitor.h"
 #include "clang/Frontend/CompilerInstance.h"
 #include "clang/Frontend/FrontendAction.h"
 #include "clang/Tooling/Tooling.h"
 
+// TODO
+using namespace clang::tooling;
 using namespace clang;
 
 class FindNamedClassVisitor
@@ -42,14 +49,21 @@ private:
 class FindNamedClassAction : public clang::ASTFrontendAction {
 public:
   virtual std::unique_ptr<clang::ASTConsumer> CreateASTConsumer(
-    clang::CompilerInstance &Compiler, llvm::StringRef InFile) {
+    clang::CompilerInstance &Compiler, llvm::StringRef) {
     return std::unique_ptr<clang::ASTConsumer>(
         new FindNamedClassConsumer(&Compiler.getASTContext()));
   }
 };
 
-int main(int argc, char **argv) {
-  if (argc > 1) {
-    clang::tooling::runToolOnCode(new FindNamedClassAction, argv[1]);
-  }
+
+int main(int argc, const char **argv) {
+  // TODO
+  llvm::cl::OptionCategory category("shoulda");
+  CommonOptionsParser parser(argc, argv, category);
+
+  ClangTool tool(parser.getCompilations(),
+                 parser.getSourcePathList());
+  
+  int result = tool.run(newFrontendActionFactory<clang::SyntaxOnlyAction>().get());
+  return result;
 }
