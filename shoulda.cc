@@ -50,6 +50,13 @@ void show_errors(const TranslationUnit& translation_unit) {
   const auto cursor = translation_unit.cursor();
   cursor.visit_unused_return_values(
       [](const Cursor& current, const Cursor& parent) {
+        // Skip system includes (TODO: find a more robust way to do
+        // this)
+        const auto path = current.location().path();
+        if (path.length() >= 4 && path.substr(0, 4) == "/usr") {
+          return;
+        }
+
         outputError(current, parent);
       });
 }
