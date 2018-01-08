@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <iterator>
+#include <vector>
 
 #include "libshoulda/code_index.hh"
 
@@ -11,6 +12,8 @@
 using shoulda::CodeIndex;
 using shoulda::Location;
 using shoulda::W;
+
+using wvec = std::vector<W>;
 
 // Assumes that the test program is run from a build directory inside
 // the repository checkout
@@ -41,7 +44,7 @@ std::vector<W> load(const std::string path) {
 }
 
 TEST_CASE("simple_unused_return") {
-  const auto e = {W(6, 3)};
+  const auto e = wvec{W(6, 3)};
   REQUIRE(load("simple_unused_return.c") == e);
 }
 
@@ -54,11 +57,11 @@ TEST_CASE("if_condition") {
 }
 
 TEST_CASE("if_braced_body") {
-  const auto e = {W(7, 5)};
+  const auto e = wvec{W(7, 5)};
   REQUIRE(load("if_braced_body.c") == e);
 }
 
 TEST_CASE("if_unbraced_body") {
-  const auto e = {W(7, 5)};
+  const auto e = wvec{W(7, 5)};
   REQUIRE(load("if_unbraced_body.c") == e);
 }
