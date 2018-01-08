@@ -23,6 +23,8 @@ class Location {
 
   size_t column() const;
 
+  bool operator==(const Location& other) const;
+
  private:
   const std::string path_;
   const size_t line_;

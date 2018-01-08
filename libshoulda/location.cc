@@ -37,4 +37,10 @@ size_t Location::column() const {
   return column_;
 }
 
+bool Location::operator==(const Location& other) const {
+  return (path_ == other.path_ &&
+          line_ == other.line_ &&
+          column_ == other.column_);
+}
+
 }
