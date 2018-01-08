@@ -29,6 +29,28 @@ std::vector<Location> Cursor::find_unused_return_values() const {
   return result;
 }
 
+std::vector<Cursor> Cursor::get_children() const {
+  using Children = std::vector<Cursor>;
+  Children children;
+  CXClientData client_data = static_cast<CXClientData>(&children);
+  clang_visitChildren(
+        cursor_,
+        [](CXCursor current, CXCursor, CXClientData client_data) {
+          Children* children = static_cast<Children*>(client_data);
+          children->emplace_back(current);
+          return CXChildVisit_Continue;
+        },
+        client_data);
+  return children;
+}
+
+bool Cursor::operator==(const Cursor& other) const {
+  const auto loc = Location::create(clang_getCursorLocation(cursor_));
+  const auto other_loc = Location::create(
+      clang_getCursorLocation(other.cursor_));
+  return loc == other_loc;
+}
+
 bool Cursor::is_unused_return_value(
     const Cursor& current, const Cursor& parent) {
   if (current.kind() != CXCursor_CallExpr) {
@@ -36,16 +58,22 @@ bool Cursor::is_unused_return_value(
     return false;
   }
 
-  // Function's return value is not void
+  // Ignore functions that don't return anything
   if (current.type().kind == CXType_Void) {
-    // Function's return type is void
     return false;
   }
 
   const auto parent_kind = parent.kind();
+
+  const auto siblings = parent.get_children();
+  if (parent_kind == CXCursor_IfStmt) {
+    // If the return value is the conditional it's used. If it's the
+    // unbraced body of the |if| then the value isn't used.
+    return current == siblings[1];
+  }
+
   return (parent_kind != CXCursor_BinaryOperator &&
           parent_kind != CXCursor_CallExpr &&
-          parent_kind != CXCursor_IfStmt &&
           parent_kind != CXCursor_MemberRefExpr &&
           parent_kind != CXCursor_ReturnStmt &&
           parent_kind != CXCursor_TypedefDecl &&

@@ -44,6 +44,10 @@ class Cursor {
 
   CXType type() const;
 
+  std::vector<Cursor> get_children() const;
+
+  bool operator==(const Cursor& other) const;
+
  private:
   static bool is_unused_return_value(
       const Cursor& current, const Cursor& parent);
