@@ -1,6 +1,8 @@
 // adapted from http://shaharmike.com/cpp/libclang/
 
 #include <iostream>
+#include <set>
+#include <sstream>
 #include <vector>
 
 #include <unistd.h>
@@ -29,14 +31,27 @@ ostream &operator<<(ostream &stream, const CXString &str) {
   return stream;
 }
 
-void outputError(Cursor cursor, Cursor parent) {
+std::string format_error(Cursor cursor, Cursor parent) {
   const auto location = cursor.location();
 
-  cout << location.path() << ":"
-       << location.line() << ":"
-       << location.column() << ": warning: unused return value (parent is "
-       << clang_getCursorKindSpelling(parent.kind()) << ")"
-       << endl;
+  std::ostringstream stream;
+  stream << location.path() << ":"
+         << location.line() << ":"
+         << location.column() << ": warning: unused return value (parent is "
+         << clang_getCursorKindSpelling(parent.kind()) << ")";
+  return stream.str();
+}
+
+void output_error(Cursor cursor, Cursor parent) {
+  // Keep track of all errors to skip duplicates
+  static std::set<std::string> all_errors;
+
+  const auto str = format_error(cursor, parent);
+
+  if (all_errors.find(str) == all_errors.end()) {
+    cout << str << endl;
+    all_errors.emplace(str);
+  }
 }
 
 
@@ -57,7 +72,7 @@ void show_errors(const TranslationUnit& translation_unit) {
           return;
         }
 
-        outputError(current, parent);
+        output_error(current, parent);
       });
 }
 
