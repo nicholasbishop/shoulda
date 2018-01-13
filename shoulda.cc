@@ -89,7 +89,12 @@ void check_compilation_database(const std::string& path) {
       exit(-1);
     }
 
-    show_errors(index.translation_unit_from_command(cc));
+    try {
+      show_errors(index.translation_unit_from_command(cc));
+    } catch (const std::exception& err) {
+      cerr << "error in " << cc.working_directory() << ":" << err.what()
+           << endl;
+    }
   }
 }
 
